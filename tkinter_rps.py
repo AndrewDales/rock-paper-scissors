@@ -90,6 +90,7 @@ class GameOptionsGUI(tk.Frame):
         # Binds the return key to have the same effect a pressing the start_button
         self.controller.bind('<Return>', lambda event=None: self.start_button.invoke())
 
+    # Sets up players and rounds
     def set_up(self):
         if self.game.players:
             self.user_name.set(self.player.name)
