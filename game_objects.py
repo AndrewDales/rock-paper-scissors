@@ -1,3 +1,8 @@
+""" Module contains the class objects that control the underlying logic for rock-paper scissors the module includes a
+command-line interface for running the game."""
+
+# rock-paper-scissors/game_objects
+
 import random
 
 

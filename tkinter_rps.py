@@ -1,3 +1,8 @@
+""" Module contains the tkinter view for running rock, paper, scissors. The view imports the underlying structure of
+the rock-paper-scissors game by importing the game_objects"""
+
+# rock-paper-scissors/tkinter_rps
+
 import tkinter as tk
 from game_objects import Game
 

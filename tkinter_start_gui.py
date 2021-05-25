@@ -2,6 +2,7 @@ import tkinter as tk
 
 
 class TestGUI(tk.Frame):
+    """ TestGUI is a simple single frame tkinter app demonstrating setting up a button and binding a key press"""
     def __init__(self, parent):
         super().__init__(parent)
 
