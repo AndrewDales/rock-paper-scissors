@@ -6,7 +6,7 @@ command-line interface for running the game."""
 import random
 
 
-# The Player Class represents a player
+# The Player Class represents a player - could be either human or a computer player
 class Player:
     def __init__(self, name=None):
         if name:
@@ -16,14 +16,6 @@ class Player:
         self.score = 0
         self.current_object = None
 
-    def choose_object(self, choice, objects=None):
-        choice = choice.lower()
-        if objects is None:
-            objects = ('rock', 'paper', 'scissors')
-        if choice not in objects:
-            raise ValueError("Choice must be 'rock', 'paper' or 'scissors'")
-        self.current_object = choice
-
     def set_name(self, name):
         self.name = name
 
@@ -32,6 +24,21 @@ class Player:
 
     def win_round(self):
         self.score += 1
+
+    def __repr__(self):
+        check_object_chosen = bool(self.current_object)
+        return f'Player: {self.name}\nScore: {self.score}\nObject chosen: {check_object_chosen}'
+
+
+# A HumanPlayer subclasses Player
+class HumanPlayer(Player):
+    def choose_object(self, choice, objects=None):
+        choice = choice.lower()
+        if objects is None:
+            objects = ('rock', 'paper', 'scissors')
+        if choice not in objects:
+            raise ValueError("Choice must be 'rock', 'paper' or 'scissors'")
+        self.current_object = choice
 
 
 # The ComputerPlayer Class is a subclass of Player
@@ -54,7 +61,7 @@ class Game:
         self.round_winner = None
 
     def add_human_player(self, name=None):
-        player = Player(name)
+        player = HumanPlayer(name)
         self.players.append(player)
         return player
 
