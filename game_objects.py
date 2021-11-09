@@ -1,5 +1,5 @@
-""" Module contains the class objects that control the underlying logic for rock-paper scissors the module includes a
-command-line interface for running the game."""
+""" Module contains the class objects that control the underlying logic for rock-paper scissors game.
+The module includes a command-line interface (CLI) for running the game."""
 
 # rock-paper-scissors/game_objects
 
@@ -8,11 +8,15 @@ import random
 
 # The Player Class represents a player - could be either human or a computer player
 class Player:
-    def __init__(self, name=None):
+    object_list = ("rock", "paper", "scissors")
+
+    def __init__(self, name=None, object_list=None):
         if name:
             self.name = name
         else:
             self.name = ""
+        if object_list:
+            self.object_list = object_list
         self.score = 0
         self.current_object = None
 
@@ -32,21 +36,18 @@ class Player:
 
 # A HumanPlayer subclasses Player
 class HumanPlayer(Player):
-    def choose_object(self, choice, objects=None):
+    def choose_object(self, choice):
         choice = choice.lower()
-        if objects is None:
-            objects = ('rock', 'paper', 'scissors')
-        if choice not in objects:
-            raise ValueError("Choice must be 'rock', 'paper' or 'scissors'")
+        if choice not in self.object_list:
+            object_list = tuple(f"'{obj}'" for obj in self.object_list)
+            raise ValueError(f"Choice must be {', '.join(object_list[:-1])} or {object_list[-1]}")
         self.current_object = choice
 
 
 # The ComputerPlayer Class is a subclass of Player
 class ComputerPlayer(Player):
-    def choose_object(self, choice=None, objects=None):
-        if objects is None:
-            objects = ('rock', 'paper', 'scissors')
-        self.current_object = random.choice(objects)
+    def choose_object(self):
+        self.current_object = random.choice(self.object_list)
 
 
 class Game:
@@ -61,7 +62,7 @@ class Game:
         self.round_winner = None
 
     def add_human_player(self, name=None):
-        player = HumanPlayer(name)
+        player = HumanPlayer(name, self.allowed_objects)
         self.players.append(player)
         return player
 
@@ -166,10 +167,10 @@ class ClInterface:
             while player.current_object is None:
                 try:
                     if isinstance(player, ComputerPlayer):
-                        choice = None
-                    else:
-                        choice = input("Please choose 'rock', 'paper', or 'scissors': ")
-                    player.choose_object(choice)
+                        player.choose_object()
+                    elif isinstance(player, HumanPlayer):
+                        current_choice = input("Please choose 'rock', 'paper', or 'scissors': ")
+                        player.choose_object(current_choice)
                 except ValueError:
                     pass
 
