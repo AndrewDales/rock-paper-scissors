@@ -29,7 +29,8 @@ class GameApp(tk.Tk):
                                font=("Arial", 20))
         title_label.pack()
 
-        # Set up a set of frames for each of the page classes
+        # Create a dictionary of frames. The key is the frame class and the value is an instance of that class
+        # with master being the GameApp container
         self.frames = {page: page(self) for page in (GameOptionsGUI, GameGUI)}
 
         # Show the GameOptionsGUI frame
