@@ -29,15 +29,10 @@ class GameApp(tk.Tk):
                                font=("Arial", 20))
         title_label.pack()
 
-        # Initialise frames to an empty dictionary
-        self.frames = {}
+        # Set up a set of frames for each of the page classes
+        self.frames = {page: page(self) for page in (GameOptionsGUI, GameGUI)}
 
-        # Set up frames for each of the page classes
-        pages = (GameOptionsGUI, GameGUI)
-        for F in pages:
-            frame = F(self)
-            self.frames[F] = frame
-
+        # Show the GameOptionsGUI frame
         self.show_frame(GameOptionsGUI)
 
     # Function to show the desired game class, which is a subclass of tk.Frame
