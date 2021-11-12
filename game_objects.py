@@ -6,17 +6,45 @@ The module includes a command-line interface (CLI) for running the game."""
 import random
 
 
-# The Player Class represents a player - could be either human or a computer player
-class Player:
-    object_list = ("rock", "paper", "scissors")
+# PlayerObject represents an object that a player could choose
+class PlayerObject:
+    # allowable_objects = ('rock', 'paper', 'scissors')
+    # win_dict = {'rock': ['scissors'], 'scissors': ['paper'], 'paper': ['rock']}
+    allowable_objects = ('rock', 'paper', 'scissors', 'lizard', 'spock')
+    win_dict = {'rock': ['scissors', 'lizard'],
+                'scissors': ['paper', 'lizard'],
+                'paper': ['rock', 'spock'],
+                'lizard': ['paper', 'spock'],
+                'spock': ['rock', 'scissors'],
+                }
 
-    def __init__(self, name=None, object_list=None):
+    def __init__(self, name):
+        if name.lower() in self.allowable_objects:
+            self.name = name.lower()
+        else:
+            raise ValueError(f"Choice must be in {', '.join(self.allowable_objects)}")
+
+    @classmethod
+    def random_object(cls):
+        return PlayerObject(random.choice(cls.allowable_objects))
+
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def __gt__(self, other):
+        return other.name in self.win_dict[self.name]
+
+    def __repr__(self):
+        return f'<{self.name.title()}>'
+
+
+# The Player Class represents a player
+class Player:
+    def __init__(self, name=None):
         if name:
             self.name = name
         else:
             self.name = ""
-        if object_list:
-            self.object_list = object_list
         self.score = 0
         self.current_object = None
 
@@ -34,40 +62,40 @@ class Player:
         return f'Player: {self.name}\nScore: {self.score}\nObject chosen: {check_object_chosen}'
 
 
-# A HumanPlayer subclasses Player
+# The HumanPlayer Class is a subclass of Player representing a human player
 class HumanPlayer(Player):
     def choose_object(self, choice):
-        choice = choice.lower()
-        if choice not in self.object_list:
-            object_list = tuple(f"'{obj}'" for obj in self.object_list)
-            raise ValueError(f"Choice must be {', '.join(object_list[:-1])} or {object_list[-1]}")
-        self.current_object = choice
+        self.current_object = PlayerObject(choice)
 
 
-# The ComputerPlayer Class is a subclass of Player
+# The ComputerPlayer Class is a subclass of Player representing a Computer player
 class ComputerPlayer(Player):
+    def __init__(self):
+        super().__init__('Computer')
+
     def choose_object(self):
-        self.current_object = random.choice(self.object_list)
+        self.current_object = PlayerObject.random_object()
 
-
+# The Game class contains the instructions for running the game
 class Game:
+
     def __init__(self):
         self.current_round = 0
         self.max_rounds = None
         self.players = []
-        self.allowed_objects = ('rock', 'paper', 'scissors')
         # round_result is None - not played, draw or win
         self.round_result = None
         # round_winner is the player who has won the round
         self.round_winner = None
 
+    # Add a human player with their name
     def add_human_player(self, name=None):
-        player = HumanPlayer(name, self.allowed_objects)
+        player = HumanPlayer(name)
         self.players.append(player)
         return player
 
-    def add_computer_player(self, name="Computer"):
-        self.players.append(ComputerPlayer(name))
+    def add_computer_player(self):
+        self.players.append(ComputerPlayer())
 
     def set_max_rounds(self, mr):
         if not isinstance(mr, int):
@@ -79,15 +107,14 @@ class Game:
         # checks if all the player choices are non-empty values
         if not all(choices):
             raise TypeError("All choices must be non-empty")
-        choice_diff = (self.allowed_objects.index(choices[0]) - self.allowed_objects.index(choices[1])) % 3
-        if choice_diff == 0:
+        if choices[0] == choices[1]:
             self.round_result = "draw"
             self.round_winner = None
         else:
             self.round_result = "win"
-            if choice_diff == 1:
+            if choices[0] > choices[1]:
                 self.round_winner = self.players[0]
-            elif choice_diff == 2:
+            else:
                 self.round_winner = self.players[1]
             self.round_winner.win_round()
 
@@ -96,7 +123,7 @@ class Game:
         self.round_result = None
         self.round_winner = None
         for player in self.players:
-            player.current_object = None
+            player.reset_object()
         self.current_round += 1
 
     # Checks if game is finished
@@ -110,7 +137,7 @@ class Game:
         self.round_winner = None
         for player in self.players:
             player.score = 0
-            player.current_object = None
+            player.reset_object()
 
     # returns a message reporting on what the players played and what the result of the round was
     def report_round(self):
@@ -118,8 +145,8 @@ class Game:
             report_msg = 'Round has not been played'
         else:
             report_msg = (
-                f"{self.players[0].name} choose '{self.players[0].current_object}'.\n"
-                f"{self.players[1].name} choose '{self.players[1].current_object}'.\n")
+                f"{self.players[0].name} choose '{self.players[0].current_object.name}'.\n"
+                f"{self.players[1].name} choose '{self.players[1].current_object.name}'.\n")
 
             if self.round_result == "draw":
                 report_msg += "Round was a draw"
@@ -144,19 +171,30 @@ class Game:
         return win_msg
 
 
-# Command Line Interface - runs the game from the Command line
+# Command Line Interface - gives prompts to run the game from the Command line
 class ClInterface:
     def __init__(self):
         self.game = Game()
 
     def set_up(self):
-        wel_string = "Welcome to the Rock, Paper, Scissors Game"
+        objects = PlayerObject.allowable_objects
+        wel_string = f"Welcome to the {', '.join([obj.title() for obj in objects])} Game"
         print(wel_string)
-        print("-"*len(wel_string)+"\n")
-        name = input("Enter Player's name: ")
+        print("-"*len(wel_string))
 
-        self.game.add_human_player(name)
-        self.game.add_computer_player()
+        for i in range(2):
+            player_type_chosen = False
+            while not player_type_chosen:
+                player_type = input(f"\nWill player {i} be a human (h) or the computer (c): ")
+                if player_type[0].lower() == "h":
+                    name = input("\nEnter Player's name: ")
+                    self.game.add_human_player(name)
+                    player_type_chosen = True
+                elif player_type[0].lower() == "c":
+                    self.game.add_computer_player()
+                    player_type_chosen = True
+                else:
+                    print("Error - please enter 'h' or 'c'")
         self.input_max_rounds()
 
     def input_max_rounds(self):
@@ -168,11 +206,13 @@ class ClInterface:
                 try:
                     if isinstance(player, ComputerPlayer):
                         player.choose_object()
-                    elif isinstance(player, HumanPlayer):
-                        current_choice = input("Please choose 'rock', 'paper', or 'scissors': ")
-                        player.choose_object(current_choice)
-                except ValueError:
-                    pass
+                    else:
+                        object_list = [f"'{obj}'" for obj in PlayerObject.allowable_objects]
+                        choice = input(f"{player.name} please choose "
+                                       f"{', '.join(object_list[:-1])} or {object_list[-1]}: ")
+                        player.choose_object(choice)
+                except ValueError as e:
+                    print(e)
 
     def run_game(self):
 
