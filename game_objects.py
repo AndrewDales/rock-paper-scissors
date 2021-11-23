@@ -8,8 +8,6 @@ import random
 
 # PlayerObject represents an object that a player could choose
 class PlayerObject:
-    # allowable_objects = ('rock', 'paper', 'scissors')
-    # win_dict = {'rock': ['scissors'], 'scissors': ['paper'], 'paper': ['rock']}
     allowable_objects = ('rock', 'paper', 'scissors', 'lizard', 'spock')
     win_dict = {'rock': ['scissors', 'lizard'],
                 'scissors': ['paper', 'lizard'],
@@ -27,6 +25,16 @@ class PlayerObject:
     @classmethod
     def random_object(cls):
         return PlayerObject(random.choice(cls.allowable_objects))
+
+    @classmethod
+    def set_object_rules(cls, allowable_objects=None, win_dict=None):
+        if allowable_objects:
+            cls.allowable_objects = allowable_objects
+        if win_dict:
+            if set(win_dict.keys()) == set(allowable_objects):
+                cls.win_dict = win_dict
+            else:
+                raise ValueError("Keys of win_dict must be the allowable objects")
 
     def __eq__(self, other):
         return self.name == other.name
@@ -76,10 +84,22 @@ class ComputerPlayer(Player):
     def choose_object(self):
         self.current_object = PlayerObject.random_object()
 
+
 # The Game class contains the instructions for running the game
 class Game:
 
-    def __init__(self):
+    def __init__(self, allowable_objects=None, win_dict=None):
+        if allowable_objects is None:
+            allowable_objects = ('rock', 'paper', 'scissors', 'lizard', 'spock')
+        if win_dict is None:
+            win_dict = {'rock': ['scissors', 'lizard'],
+                        'scissors': ['paper', 'lizard'],
+                        'paper': ['rock', 'spock'],
+                        'lizard': ['paper', 'spock'],
+                        'spock': ['rock', 'scissors'],
+                        }
+        self.allowable_objects = allowable_objects
+        self.win_dict = win_dict
         self.current_round = 0
         self.max_rounds = None
         self.players = []
@@ -87,6 +107,7 @@ class Game:
         self.round_result = None
         # round_winner is the player who has won the round
         self.round_winner = None
+        PlayerObject.set_object_rules(self.allowable_objects, self.win_dict)
 
     # Add a human player with their name
     def add_human_player(self, name=None):
@@ -175,12 +196,17 @@ class Game:
 class ClInterface:
     def __init__(self):
         self.game = Game()
+        # Convert to plain Rock, Paper, Scissors by uncommenting next 3 lines
+        # ToDo Give the user an option to choose this
+        # allowable_objects = ('rock', 'paper', 'scissors')
+        # win_dict = {'rock': ['scissors'], 'scissors': ['paper'], 'paper': ['rock']}
+        # self.game = Game(allowable_objects, win_dict)
 
     def set_up(self):
-        objects = PlayerObject.allowable_objects
+        objects = self.game.allowable_objects
         wel_string = f"Welcome to the {', '.join([obj.title() for obj in objects])} Game"
         print(wel_string)
-        print("-"*len(wel_string))
+        print("-" * len(wel_string))
 
         for i in range(2):
             player_type_chosen = False
@@ -227,7 +253,7 @@ class ClInterface:
             print()
 
         print("Final Results")
-        print("-"*13)
+        print("-" * 13)
         print(self.game.report_score())
         print()
         print(self.game.report_winner())

@@ -5,17 +5,20 @@ the rock-paper-scissors game by importing the game_objects"""
 
 import tkinter as tk
 from game_objects import Game
+from functools import partial
 
 
 class GameApp(tk.Tk):
     """ GameApp initialises a game and a Tk instance (window)
     The window includes a title and sets up frames with the different views on the game
     The show_frame method unpacks all the frames except for the one that needs to be shown """
+
     def __init__(self):
         super().__init__()
-        self.title('Rock, Paper, Scissors game')
-        self.resizable(False, False)
         self.game = create_game()
+        title_string = ", ".join(obj.title() for obj in self.game.allowable_objects) + " Game"
+        self.title(title_string)
+        self.resizable(False, False)
 
         # creating a container
         container = tk.Frame(self)
@@ -23,9 +26,9 @@ class GameApp(tk.Tk):
 
         # Create an overall title and pack it into the top of the container
         title_label = tk.Label(container,
-                               text="Rock, Paper, Scissors",
+                               text=title_string,
                                bg="red", fg="white",
-                               width=30,
+                               width=40,
                                font=("Arial", 20))
         title_label.pack()
 
@@ -46,6 +49,7 @@ class GameApp(tk.Tk):
 
 class GameOptionsGUI(tk.Frame):
     """ GameOptionsGUI is a subclass of tk.Frame that allows the user to enter options and then start the game"""
+
     def __init__(self, controller):
         super().__init__()
         self.controller = controller
@@ -130,14 +134,15 @@ class GameGUI(tk.Frame):
         self.report_message = tk.StringVar()
         self.results_message = tk.StringVar()
 
-        self.outcome = tk.Label(self, textvariable=self.report_message, bg="blue", fg="white", width=30)
+        self.outcome = tk.Label(self, textvariable=self.report_message, bg="blue", fg="white", width=35)
 
-        # Creates a dictionary with the action buttons for 'rock', 'paper' and scissors
+        # Creates a dictionary with the action buttons for each allowable game object
         # Use the 'anonymous function' lambda to give a callback command with an argument
-        self.action_buttons = \
-            {'rock': tk.Button(self, text="Rock (R)", width=15, command=lambda: self.select_object("rock")),
-             'paper': tk.Button(self, text="Paper (P)", width=15, command=lambda: self.select_object("paper")),
-             'scissors': tk.Button(self, text="Scissors (S)", width=15, command=lambda: self.select_object("scissors"))}
+        self.action_buttons = {player_obj: tk.Button(self, text=player_obj.title(),
+                                                     width=15,
+                                                     command=partial(self.select_object, player_obj),
+                                                     )
+                               for player_obj in self.game.allowable_objects}
 
         self.quit_button = tk.Button(self, text="Quit", width=15, command=self.controller.destroy)
         self.restart_button = tk.Button(self, text="New game (N)", width=15, command=self.restart_game)
@@ -148,10 +153,10 @@ class GameGUI(tk.Frame):
         for i, btn in enumerate(self.action_buttons.values(), 1):
             btn.grid(row=i, column=0, pady=5)
         self.outcome.grid(row=1, column=1, rowspan=3)
-        self.results.grid(row=4, column=0, columnspan=2, pady=5)
-        self.quit_button.grid(row=5, column=0, pady=(5, 10), rowspan=2)
-        self.restart_button.grid(row=5, column=1, pady=5)
-        self.options_button.grid(row=6, column=1, pady=(5, 10))
+        self.results.grid(row=i+1, column=0, columnspan=2, pady=5)
+        self.quit_button.grid(row=i+2, column=0, pady=(5, 10), rowspan=2)
+        self.restart_button.grid(row=i+2, column=1, pady=5)
+        self.options_button.grid(row=i+3, column=1, pady=(5, 10))
 
         # Ensure the columns in the grid are equally spaced
         self.columnconfigure(0, weight=1)
@@ -161,7 +166,8 @@ class GameGUI(tk.Frame):
         self.bind('<Key>', self.press_key)
 
     def set_up(self):
-        self.report_message.set("Choose rock, paper or scissors to start")
+        obj_str = ", ".join(self.game.allowable_objects[:-1]) + f"\n or {self.game.allowable_objects[-1]}"
+        self.report_message.set(f"Choose {obj_str} to start")
         self.results_message.set(
             f"Welcome {self.game.players[0].name}. You have {self.game.max_rounds} rounds to play")
         # Focus on the current frame (so that key strokes binds work)
@@ -169,12 +175,14 @@ class GameGUI(tk.Frame):
 
     def press_key(self, event):
         key_pressed = event.char.lower()
-        if key_pressed == "r":
-            self.action_buttons["rock"].invoke()
-        if key_pressed == "p":
-            self.action_buttons["paper"].invoke()
-        if key_pressed == "s":
-            self.action_buttons["scissors"].invoke()
+        action_key_bindings = {"r": "rock",
+                               "p": "paper",
+                               "s": "scissors",
+                               "l": "lizard",
+                               "k": "spock",
+                               }
+        if key_pressed in action_key_bindings:
+            self.action_buttons[action_key_bindings[key_pressed]].invoke()
         if key_pressed == "o":
             self.options_button.invoke()
         if key_pressed == "n":
@@ -221,6 +229,11 @@ class GameGUI(tk.Frame):
 def create_game():
     """Create a game instance"""
     game = Game()
+    # Convert to plain Rock, Paper, Scissors by uncommenting next 3 lines
+    # ToDo Give the user an option to choose this
+    # allowable_objects = ('rock', 'paper', 'scissors')
+    # win_dict = {'rock': ['scissors'], 'scissors': ['paper'], 'paper': ['rock']}
+    # game = Game(allowable_objects, win_dict)
     game.player = game.add_human_player()
     game.add_computer_player()
     return game
