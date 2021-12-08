@@ -17,34 +17,40 @@ class GameApp(tk.Tk):
         super().__init__()
         self.game = create_game()
         title_string = ", ".join(obj.title() for obj in self.game.allowable_objects) + " Game"
+
+        # Set the window title
         self.title(title_string)
         self.resizable(False, False)
 
-        # creating a container
-        container = tk.Frame(self)
-        container.pack()
-
         # Create an overall title and pack it into the top of the container
-        title_label = tk.Label(container,
+        title_label = tk.Label(self,
                                text=title_string,
                                bg="red", fg="white",
                                width=40,
                                font=("Arial", 20))
-        title_label.pack()
+        title_label.pack(side=tk.TOP)
 
-        # Create a dictionary of frames. The key is the frame class and the value is an instance of that class
-        # with master being the GameApp container
-        self.frames = {page: page(self) for page in (GameOptionsGUI, GameGUI)}
+        # Create a dictionary of frames. The key identifies the frame and the value is an instance of the
+        # frame object
+        self.frames = {
+            "game_options": GameOptionsGUI(self),
+            "main_game": GameGUI(self)}
 
         # Show the GameOptionsGUI frame
-        self.show_frame(GameOptionsGUI)
+        self.show_frame("game_options")
 
     # Function to show the desired game class, which is a subclass of tk.Frame
-    def show_frame(self, current_frame):
-        for frame in self.frames.values():
-            frame.pack_forget()
-        self.frames[current_frame].pack(fill=tk.X)
-        self.frames[current_frame].set_up()
+    def show_frame(self, current_frame: str):
+        widgets = self.winfo_children()
+        # Forget all the frames
+        for w in widgets:
+            if w.winfo_class() == "Frame":
+                w.pack_forget()
+
+        # Find and pack the current_frame
+        frame_to_show = self.frames[current_frame]
+        frame_to_show.pack(expand=True, fill=tk.BOTH)
+        frame_to_show.set_up()
 
 
 class GameOptionsGUI(tk.Frame):
@@ -68,7 +74,8 @@ class GameOptionsGUI(tk.Frame):
         vcmd = (self.register(self.validate_entry), '%P')
         self.name_edit = tk.Entry(self, textvariable=self.user_name,
                                   name='editbox',
-                                  validate='key', validatecommand=vcmd,
+                                  validate='key',
+                                  validatecommand=vcmd,
                                   justify=tk.CENTER, width=15)
         round_spin = tk.Spinbox(self, textvariable=self.num_rounds,
                                 state='readonly',
@@ -110,7 +117,7 @@ class GameOptionsGUI(tk.Frame):
     def start_game(self):
         self.game.set_max_rounds(self.num_rounds.get())
         # Switch to the GameGUI frame.
-        self.controller.show_frame(GameGUI)
+        self.controller.show_frame("main_game")
 
     def validate_entry(self, user_name):
         if (0 < len(user_name) < 13) and user_name.isalpha():
@@ -152,11 +159,13 @@ class GameGUI(tk.Frame):
         # Place objects on the grid
         for i, btn in enumerate(self.action_buttons.values(), 1):
             btn.grid(row=i, column=0, pady=5)
+
+        num_buttons = len(self.action_buttons)
         self.outcome.grid(row=1, column=1, rowspan=3)
-        self.results.grid(row=i+1, column=0, columnspan=2, pady=5)
-        self.quit_button.grid(row=i+2, column=0, pady=(5, 10), rowspan=2)
-        self.restart_button.grid(row=i+2, column=1, pady=5)
-        self.options_button.grid(row=i+3, column=1, pady=(5, 10))
+        self.results.grid(row=num_buttons+2, column=0, columnspan=2, pady=5)
+        self.quit_button.grid(row=num_buttons+2, column=0, pady=(5, 10), rowspan=2)
+        self.restart_button.grid(row=num_buttons+2, column=1, pady=5)
+        self.options_button.grid(row=num_buttons+3, column=1, pady=(5, 10))
 
         # Ensure the columns in the grid are equally spaced
         self.columnconfigure(0, weight=1)
@@ -223,7 +232,7 @@ class GameGUI(tk.Frame):
     def reset_game(self):
         self.restart_game()
         # Switch to the GameOptionsGUI frame.
-        self.controller.show_frame(GameOptionsGUI)
+        self.controller.show_frame("game_options")
 
 
 def create_game():
