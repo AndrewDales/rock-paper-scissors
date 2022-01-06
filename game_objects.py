@@ -115,8 +115,11 @@ class Game:
         self.players.append(player)
         return player
 
+    # Add a computer player (no name)
     def add_computer_player(self):
-        self.players.append(ComputerPlayer())
+        comp_player = ComputerPlayer()
+        self.players.append(comp_player)
+        return comp_player
 
     def set_max_rounds(self, mr):
         if not isinstance(mr, int):
