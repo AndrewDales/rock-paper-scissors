@@ -163,9 +163,9 @@ class GameGUI(tk.Frame):
         num_buttons = len(self.action_buttons)
         self.outcome.grid(row=1, column=1, rowspan=3)
         self.results.grid(row=num_buttons+2, column=0, columnspan=2, pady=5)
-        self.quit_button.grid(row=num_buttons+2, column=0, pady=(5, 10), rowspan=2)
-        self.restart_button.grid(row=num_buttons+2, column=1, pady=5)
-        self.options_button.grid(row=num_buttons+3, column=1, pady=(5, 10))
+        self.quit_button.grid(row=num_buttons+3, column=0, pady=(5, 10), rowspan=2)
+        self.restart_button.grid(row=num_buttons+3, column=1, pady=5)
+        self.options_button.grid(row=num_buttons+4, column=1, pady=(5, 10))
 
         # Ensure the columns in the grid are equally spaced
         self.columnconfigure(0, weight=1)
