@@ -4,7 +4,7 @@ the rock-paper-scissors game by importing the game_objects"""
 # rock-paper-scissors/tkinter_rps
 
 import tkinter as tk
-from game_objects import Game
+from game_objects import Game, PlayerObject, RPS_OBJECTS, RPS_WIN_DICT
 from functools import partial
 
 
@@ -16,7 +16,7 @@ class GameApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.game = create_game()
-        title_string = ", ".join(obj.title() for obj in self.game.allowable_objects) + " Game"
+        title_string = ", ".join(obj.title() for obj in PlayerObject.allowable_objects) + " Game"
 
         # Set the window title
         self.title(title_string)
@@ -149,7 +149,7 @@ class GameGUI(tk.Frame):
                                                      width=15,
                                                      command=partial(self.select_object, player_obj),
                                                      )
-                               for player_obj in self.game.allowable_objects}
+                               for player_obj in PlayerObject.allowable_objects}
 
         self.quit_button = tk.Button(self, text="Quit", width=15, command=self.controller.destroy)
         self.restart_button = tk.Button(self, text="New game (N)", width=15, command=self.restart_game)
@@ -175,11 +175,11 @@ class GameGUI(tk.Frame):
         self.bind('<Key>', self.press_key)
 
     def set_up(self):
-        obj_str = ", ".join(self.game.allowable_objects[:-1]) + f"\n or {self.game.allowable_objects[-1]}"
+        obj_str = ", ".join(PlayerObject.allowable_objects[:-1]) + f"\n or {PlayerObject.allowable_objects[-1]}"
         self.report_message.set(f"Choose {obj_str} to start")
         self.results_message.set(
             f"Welcome {self.game.players[0].name}. You have {self.game.max_rounds} rounds to play")
-        # Focus on the current frame (so that key strokes binds work)
+        # Focus on the current frame (so that keystrokes binds work)
         self.focus()
 
     def press_key(self, event):
@@ -237,12 +237,12 @@ class GameGUI(tk.Frame):
 
 def create_game():
     """Create a game instance"""
-    game = Game()
+    # game = Game()
     # Convert to plain Rock, Paper, Scissors by uncommenting next 3 lines
     # ToDo Give the user an option to choose this
     # allowable_objects = ('rock', 'paper', 'scissors')
     # win_dict = {'rock': ['scissors'], 'scissors': ['paper'], 'paper': ['rock']}
-    # game = Game(allowable_objects, win_dict)
+    game = Game(RPS_OBJECTS, RPS_WIN_DICT)
     game.player = game.add_human_player()
     game.add_computer_player()
     return game
