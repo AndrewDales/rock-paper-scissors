@@ -110,7 +110,7 @@ class GameOptionsGUI(tk.Frame):
             self.num_rounds.set(self.game.max_rounds)
         else:
             self.num_rounds.set(5)
-        # Put the cursor in the name_edit box and focus on the current frame (so that key strokes binds work)
+        # Put the cursor in the name_edit box and focus on the current frame (so that keystrokes binds work)
         self.name_edit.focus()
         self.focus()
 
@@ -242,7 +242,8 @@ def create_game():
     # ToDo Give the user an option to choose this
     # allowable_objects = ('rock', 'paper', 'scissors')
     # win_dict = {'rock': ['scissors'], 'scissors': ['paper'], 'paper': ['rock']}
-    game = Game(RPS_OBJECTS, RPS_WIN_DICT)
+    # game = Game(RPS_OBJECTS, RPS_WIN_DICT)
+    game = Game()
     game.player = game.add_human_player()
     game.add_computer_player()
     return game

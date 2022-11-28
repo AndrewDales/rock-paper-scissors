@@ -26,7 +26,6 @@ RPS_WIN_DICT = {'rock': ['scissors'],
                 'paper': ['rock'],
                 }
 
-
 # PlayerObject represents an object that a player could choose
 class PlayerObject:
     """
@@ -40,6 +39,7 @@ class PlayerObject:
         list of allowable objects
     win_dict: dict
         keys are allowable objects, values is list of what keys will beat
+    ...
     Methods
     -------
     random_objects (class method)

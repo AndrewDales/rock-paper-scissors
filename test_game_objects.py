@@ -1,5 +1,4 @@
-from game_objects import PlayerObject, \
-    HumanPlayer, ComputerPlayer, Game
+from game_objects import PlayerObject, HumanPlayer, ComputerPlayer, Game
 import random
 import pytest
 
