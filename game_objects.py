@@ -182,6 +182,8 @@ class Game:
             the current round
         max_rounds: int
             the maximum rounds that can be played
+        players
+            A list of players
         round_result
             None (not played), draw or win
         round_winner
@@ -196,7 +198,6 @@ class Game:
         self.current_round = 0
         self.max_rounds = None
         self.players = []
-        #
         self.round_result = None
         # round_winner is the player who has won the round
         self.round_winner = None
