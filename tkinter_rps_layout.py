@@ -63,7 +63,7 @@ class GameFrameOne(tk.Frame):
         num_rounds_value = tk.Label(self, textvariable=self.round_number)
         self.next_frame_button = tk.Button(self, text="Next Frame", command=self.next_frame)
 
-        title_label.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="news")
+        title_label.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
         num_rounds_label.grid(row=1, column=0, padx=10, pady=10)
         num_rounds_value.grid(row=1, column=1, padx=10, pady=10)
         self.next_frame_button.grid(row=2, column=1, padx=10, pady=10)
