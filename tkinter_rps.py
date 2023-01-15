@@ -6,6 +6,15 @@ the rock-paper-scissors game by importing the game_objects"""
 import tkinter as tk
 from game_objects import Game, PlayerObject, RPS_OBJECTS, RPS_WIN_DICT
 from functools import partial
+from PIL import Image, ImageTk
+
+
+IMAGES = {"scissors": Image.open(r'images\scissors.png').resize((64, 64), Image.ANTIALIAS),
+          "rock": Image.open(r'images\rock.png').resize((64, 64), Image.ANTIALIAS),
+          "paper": Image.open(r'images\paper.png').resize((64, 64), Image.ANTIALIAS),
+          "lizard": Image.open(r'images\lizard.png').resize((64, 64), Image.ANTIALIAS),
+          "spock": Image.open(r'images\spock.png').resize((64, 64), Image.ANTIALIAS),
+          }
 
 
 class GameApp(tk.Tk):
@@ -143,11 +152,14 @@ class GameGUI(tk.Frame):
 
         self.outcome = tk.Label(self, textvariable=self.report_message, bg="blue", fg="white", width=35)
 
+        self.tk_images = {item: ImageTk.PhotoImage(img) for item, img in IMAGES.items()}
+
         # Creates a dictionary with the action buttons for each allowable game object
         # Use the 'anonymous function' lambda to give a callback command with an argument
         self.action_buttons = {player_obj: tk.Button(self, text=player_obj.title(),
-                                                     width=15,
+                                                     image=self.tk_images[player_obj],
                                                      command=partial(self.select_object, player_obj),
+                                                     bg="ivory",
                                                      )
                                for player_obj in PlayerObject.allowable_objects}
 
@@ -162,10 +174,10 @@ class GameGUI(tk.Frame):
 
         num_buttons = len(self.action_buttons)
         self.outcome.grid(row=1, column=1, rowspan=3)
-        self.results.grid(row=num_buttons+2, column=0, columnspan=2, pady=5)
-        self.quit_button.grid(row=num_buttons+3, column=0, pady=(5, 10), rowspan=2)
-        self.restart_button.grid(row=num_buttons+3, column=1, pady=5)
-        self.options_button.grid(row=num_buttons+4, column=1, pady=(5, 10))
+        self.results.grid(row=num_buttons + 2, column=0, columnspan=2, pady=5)
+        self.quit_button.grid(row=num_buttons + 3, column=0, pady=(5, 10), rowspan=2)
+        self.restart_button.grid(row=num_buttons + 3, column=1, pady=5)
+        self.options_button.grid(row=num_buttons + 4, column=1, pady=(5, 10))
 
         # Ensure the columns in the grid are equally spaced
         self.columnconfigure(0, weight=1)
@@ -237,11 +249,8 @@ class GameGUI(tk.Frame):
 
 def create_game():
     """Create a game instance"""
-    # game = Game()
     # Convert to plain Rock, Paper, Scissors by uncommenting next 3 lines
     # ToDo Give the user an option to choose this
-    # allowable_objects = ('rock', 'paper', 'scissors')
-    # win_dict = {'rock': ['scissors'], 'scissors': ['paper'], 'paper': ['rock']}
     # game = Game(RPS_OBJECTS, RPS_WIN_DICT)
     game = Game()
     game.player = game.add_human_player()
