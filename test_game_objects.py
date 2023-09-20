@@ -3,6 +3,20 @@ import random
 import pytest
 
 
+class TestParametrized:
+    win_list = [('rock', ['scissors', 'lizard']),
+                ('scissors', ['paper', 'lizard']),
+                ('paper', ['rock', 'spock']),
+                ('lizard', ['paper', 'spock']),
+                ('spock', ['rock', 'scissors']),
+                ]
+
+    @pytest.mark.parametrize("obj, obj_beats", win_list)
+    def test_wins(self, obj, obj_beats):
+        assert PlayerObject(obj) > PlayerObject(obj_beats[0])
+        assert PlayerObject(obj) > PlayerObject(obj_beats[1])
+
+
 class TestObjects:
     @pytest.fixture
     def my_objects(self):
