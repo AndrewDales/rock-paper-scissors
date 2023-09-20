@@ -35,11 +35,11 @@ class TestObjects:
 
 
 class TestPlayers:
-    @pytest.fixture()
+    @pytest.fixture
     def human_player(self):
         return HumanPlayer("Andrew")
 
-    @pytest.fixture()
+    @pytest.fixture
     def computer_player(self):
         return ComputerPlayer()
 
@@ -72,7 +72,7 @@ class TestPlayers:
 
 
 class TestGame:
-    @pytest.fixture()
+    @pytest.fixture
     def my_game(self):
         random.seed(8)
         game = Game()

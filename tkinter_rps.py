@@ -9,11 +9,11 @@ from functools import partial
 from PIL import Image, ImageTk
 
 
-IMAGES = {"scissors": Image.open(r'images\scissors.png').resize((64, 64), Image.ANTIALIAS),
-          "rock": Image.open(r'images\rock.png').resize((64, 64), Image.ANTIALIAS),
-          "paper": Image.open(r'images\paper.png').resize((64, 64), Image.ANTIALIAS),
-          "lizard": Image.open(r'images\lizard.png').resize((64, 64), Image.ANTIALIAS),
-          "spock": Image.open(r'images\spock.png').resize((64, 64), Image.ANTIALIAS),
+IMAGES = {"scissors": Image.open(r'images\scissors.png').resize((64, 64), Image.Resampling.LANCZOS),
+          "rock": Image.open(r'images\rock.png').resize((64, 64), Image.Resampling.LANCZOS),
+          "paper": Image.open(r'images\paper.png').resize((64, 64), Image.Resampling.LANCZOS),
+          "lizard": Image.open(r'images\lizard.png').resize((64, 64), Image.Resampling.LANCZOS),
+          "spock": Image.open(r'images\spock.png').resize((64, 64), Image.Resampling.LANCZOS),
           }
 
 
