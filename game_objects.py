@@ -26,6 +26,7 @@ RPS_WIN_DICT = {'rock': ['scissors'],
                 'paper': ['rock'],
                 }
 
+
 # PlayerObject represents an object that a player could choose
 class PlayerObject:
     """
