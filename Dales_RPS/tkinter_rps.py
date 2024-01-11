@@ -6,18 +6,21 @@ the rock-paper-scissors game by importing the game_objects"""
 import tkinter as tk
 
 
-from game_objects import Game, PlayerObject, RPS_OBJECTS, RPS_WIN_DICT
+from game_objects import Game, PlayerObject, RPSLS_WIN_DICT, RPS_WIN_DICT
 from functools import partial
 from PIL import Image, ImageTk
 
 
-IMAGES = {"scissors": Image.open(r'images\scissors.png').resize((64, 64), resample=Image.LANCZOS),
-          "rock": Image.open(r'images\rock.png').resize((64, 64), resample=Image.LANCZOS),
-          "paper": Image.open(r'images\paper.png').resize((64, 64), resample=Image.LANCZOS),
-          "lizard": Image.open(r'images\lizard.png').resize((64, 64), resample=Image.LANCZOS),
-          "spock": Image.open(r'images\spock.png').resize((64, 64), resample=Image.LANCZOS),
+IMAGES = {"scissors": Image.open(r'../images/scissors.png').resize((64, 64), resample=Image.LANCZOS),
+          "rock": Image.open(r'../images/rock.png').resize((64, 64), resample=Image.LANCZOS),
+          "paper": Image.open(r'../images/paper.png').resize((64, 64), resample=Image.LANCZOS),
+          "lizard": Image.open(r'../images/lizard.png').resize((64, 64), resample=Image.LANCZOS),
+          "spock": Image.open(r'../images/spock.png').resize((64, 64), resample=Image.LANCZOS),
           }
 
+RULES = {'RPS': RPS_WIN_DICT,
+         'RPSLS': RPSLS_WIN_DICT,
+         }
 
 class GameApp(tk.Tk):
     """ GameApp initialises a game and a Tk instance (window)
@@ -34,18 +37,19 @@ class GameApp(tk.Tk):
         self.resizable(False, False)
 
         # Create an overall title and pack it into the top of the container
-        title_label = tk.Label(self,
+        self.title_label = tk.Label(self,
                                text=title_string,
                                bg="red", fg="white",
                                width=40,
                                font=("Arial", 20))
-        title_label.pack(side=tk.TOP)
+        self.title_label.pack(side=tk.TOP)
 
         # Create a dictionary of frames. The key identifies the frame and the value is an instance of the
         # frame object
         self.frames = {
             "game_options": GameOptionsGUI(self),
-            "main_game": GameGUI(self)}
+            "main_game": GameGUI(self),
+        }
 
         # Show the GameOptionsGUI frame
         self.show_frame("game_options")
@@ -69,6 +73,7 @@ class GameOptionsGUI(tk.Frame):
 
     def __init__(self, controller):
         super().__init__()
+
         self.controller = controller
         self.game = controller.game
         self.player = self.game.player
@@ -76,9 +81,16 @@ class GameOptionsGUI(tk.Frame):
         # Set up user_name and num_rounds as tkinter variables
         self.user_name = tk.StringVar()
         self.num_rounds = tk.IntVar()
+        self.game_type = tk.StringVar()
 
+        self.game_type.set('RPSLS')
+
+        game_type_label = tk.Label(self, text="Game Type:")
         name_label = tk.Label(self, text="Player Name:")
         rounds_label = tk.Label(self, text="Number of Rounds:")
+
+        # Set up the radio button frame with the different options
+        game_type_frame = GameSelectionRadio(self)
 
         # the validate command must be registered this allows the value of the edit box after it is typed, but before
         # it is accepted to be passed as '%P'
@@ -98,13 +110,15 @@ class GameOptionsGUI(tk.Frame):
         self.quit_button = tk.Button(self, text="Quit",
                                      width=15, command=self.controller.destroy)
 
-        name_label.grid(row=1, column=0, pady=5)
-        rounds_label.grid(row=2, column=0, pady=5)
+        game_type_label.grid(row=1, column=0, pady=5)
+        game_type_frame.grid(row=1, column=1, pady=5)
+        name_label.grid(row=2, column=0, pady=5)
+        rounds_label.grid(row=3, column=0, pady=5)
 
-        self.name_edit.grid(row=1, column=1, pady=5)
-        round_spin.grid(row=2, column=1, pady=5)
-        self.quit_button.grid(row=5, column=0, pady=(5, 10))
-        self.start_button.grid(row=5, column=1, pady=(5, 10))
+        self.name_edit.grid(row=2, column=1, pady=5)
+        round_spin.grid(row=3, column=1, pady=5)
+        self.quit_button.grid(row=4, column=0, pady=(5, 10))
+        self.start_button.grid(row=4, column=1, pady=(5, 10))
 
         # Ensure the columns in the grid are equally spaced
         self.columnconfigure(0, weight=1)
@@ -130,6 +144,13 @@ class GameOptionsGUI(tk.Frame):
         # Switch to the GameGUI frame.
         self.controller.show_frame("main_game")
 
+    def change_game(self, rules):
+        PlayerObject.set_object_rules(list(rules.keys()), rules)
+        self.controller.frames["main_game"] = GameGUI(self.controller)
+        title_string = ", ".join(obj.title() for obj in PlayerObject.allowable_objects) + " Game"
+        self.controller.title(title_string)
+        self.controller.title_label.config(text=title_string)
+
     def validate_entry(self, user_name):
         if (0 < len(user_name) < 13) and user_name.isalpha():
             self.start_button.config(state=tk.NORMAL)
@@ -139,6 +160,31 @@ class GameOptionsGUI(tk.Frame):
         else:
             return False
         return True
+
+    def game_type_select_callback(self):
+        rules = RULES[self.game_type.get()]
+        self.change_game(rules)
+
+
+class GameSelectionRadio(tk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        game_options = [('Rock, Paper, Scissors', 'RPS'),
+                        ('Rock, Paper, Scissors, Lizard, Spock', 'RPSLS'),
+                        ]
+
+        self.game_radios = [tk.Radiobutton(self, text=option[0],
+                                           value=option[1],
+                                           variable=parent.game_type,
+                                           command=parent.game_type_select_callback,
+                                           )
+                            for option in game_options]
+
+        for ro in self.game_radios:
+            ro.pack(side=tk.TOP, anchor='w')
+
+
 
 
 class GameGUI(tk.Frame):
@@ -249,12 +295,9 @@ class GameGUI(tk.Frame):
         self.controller.show_frame("game_options")
 
 
-def create_game():
+def create_game(win_dict=RPSLS_WIN_DICT):
     """Create a game instance"""
-    # Convert to plain Rock, Paper, Scissors by uncommenting next 3 lines
-    # ToDo Give the user an option to choose this
-    # game = Game(RPS_OBJECTS, RPS_WIN_DICT)
-    game = Game()
+    game = Game(list(win_dict.keys()), win_dict)
     game.player = game.add_human_player()
     game.add_computer_player()
     return game

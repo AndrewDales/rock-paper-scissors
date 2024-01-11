@@ -1,5 +1,5 @@
 import tkinter as tk
-from game_objects import Game, PlayerObject
+from Dales_RPS.game_objects import Game, PlayerObject
 from functools import partial
 
 
@@ -10,7 +10,7 @@ class GameApp(tk.Tk):
 
     def __init__(self):
         super().__init__()
-        self.game = create_game()
+#         self.game = create_game()
         title_string = ", ".join(obj.title() for obj in PlayerObject.allowable_objects) + " Game"
 
         # Set the window title
