@@ -4,16 +4,18 @@ the rock-paper-scissors game by importing the game_objects"""
 # rock-paper-scissors/tkinter_rps
 
 import tkinter as tk
+
+
 from game_objects import Game, PlayerObject, RPS_OBJECTS, RPS_WIN_DICT
 from functools import partial
 from PIL import Image, ImageTk
 
 
-IMAGES = {"scissors": Image.open(r'images\scissors.png').resize((64, 64), Image.Resampling.LANCZOS),
-          "rock": Image.open(r'images\rock.png').resize((64, 64), Image.Resampling.LANCZOS),
-          "paper": Image.open(r'images\paper.png').resize((64, 64), Image.Resampling.LANCZOS),
-          "lizard": Image.open(r'images\lizard.png').resize((64, 64), Image.Resampling.LANCZOS),
-          "spock": Image.open(r'images\spock.png').resize((64, 64), Image.Resampling.LANCZOS),
+IMAGES = {"scissors": Image.open(r'images\scissors.png').resize((64, 64), resample=Image.LANCZOS),
+          "rock": Image.open(r'images\rock.png').resize((64, 64), resample=Image.LANCZOS),
+          "paper": Image.open(r'images\paper.png').resize((64, 64), resample=Image.LANCZOS),
+          "lizard": Image.open(r'images\lizard.png').resize((64, 64), resample=Image.LANCZOS),
+          "spock": Image.open(r'images\spock.png').resize((64, 64), resample=Image.LANCZOS),
           }
 
 
@@ -155,7 +157,7 @@ class GameGUI(tk.Frame):
         self.tk_images = {item: ImageTk.PhotoImage(img) for item, img in IMAGES.items()}
 
         # Creates a dictionary with the action buttons for each allowable game object
-        # Use the 'anonymous function' lambda to give a callback command with an argument
+        # Use the 'partial' function to give a callback command with an argument
         self.action_buttons = {player_obj: tk.Button(self, text=player_obj.title(),
                                                      image=self.tk_images[player_obj],
                                                      command=partial(self.select_object, player_obj),
