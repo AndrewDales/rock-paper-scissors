@@ -22,8 +22,8 @@ RPSLS_WIN_DICT = {'rock': ['scissors', 'lizard'],
                   }
 RPS_OBJECTS = ('rock', 'paper', 'scissors')
 RPS_WIN_DICT = {'rock': ['scissors'],
-                'scissors': ['paper'],
                 'paper': ['rock'],
+                'scissors': ['paper'],
                 }
 
 

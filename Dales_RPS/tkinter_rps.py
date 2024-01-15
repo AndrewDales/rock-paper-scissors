@@ -4,12 +4,11 @@ the rock-paper-scissors game by importing the game_objects"""
 # rock-paper-scissors/tkinter_rps
 
 import tkinter as tk
-
+from tkinter import ttk
 
 from game_objects import Game, PlayerObject, RPSLS_WIN_DICT, RPS_WIN_DICT
 from functools import partial
 from PIL import Image, ImageTk
-
 
 IMAGES = {"scissors": Image.open(r'../images/scissors.png').resize((64, 64), resample=Image.LANCZOS),
           "rock": Image.open(r'../images/rock.png').resize((64, 64), resample=Image.LANCZOS),
@@ -22,6 +21,7 @@ RULES = {'RPS': RPS_WIN_DICT,
          'RPSLS': RPSLS_WIN_DICT,
          }
 
+
 class GameApp(tk.Tk):
     """ GameApp initialises a game and a Tk instance (window)
     The window includes a title and sets up frames with the different views on the game
@@ -30,18 +30,18 @@ class GameApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.game = create_game()
-        title_string = ", ".join(obj.title() for obj in PlayerObject.allowable_objects) + " Game"
-
+        self.game_titles = {rule_name: ', '.join(obj.title() for obj in rule_dict.keys())
+                            for rule_name, rule_dict in RULES.items()}
         # Set the window title
-        self.title(title_string)
+        self.title(self.game_titles['RPSLS'] + ' Game')
         self.resizable(False, False)
 
         # Create an overall title and pack it into the top of the container
         self.title_label = tk.Label(self,
-                               text=title_string,
-                               bg="red", fg="white",
-                               width=40,
-                               font=("Arial", 20))
+                                    text=self.game_titles['RPSLS'] + ' Game',
+                                    bg="red", fg="white",
+                                    width=40,
+                                    font=("Arial", 20))
         self.title_label.pack(side=tk.TOP)
 
         # Create a dictionary of frames. The key identifies the frame and the value is an instance of the
@@ -90,7 +90,12 @@ class GameOptionsGUI(tk.Frame):
         rounds_label = tk.Label(self, text="Number of Rounds:")
 
         # Set up the radio button frame with the different options
-        game_type_frame = GameSelectionRadio(self)
+        game_type_combo = ttk.Combobox(self,
+                                       textvariable=self.game_type,
+                                       values=list(self.controller.game_titles.keys()),
+                                       width=15,
+                                       )
+        game_type_combo.bind('<<ComboboxSelected>>', self.game_type_select_callback)
 
         # the validate command must be registered this allows the value of the edit box after it is typed, but before
         # it is accepted to be passed as '%P'
@@ -99,10 +104,10 @@ class GameOptionsGUI(tk.Frame):
                                   name='editbox',
                                   validate='key',
                                   validatecommand=vcmd,
-                                  justify=tk.CENTER, width=15)
+                                  justify=tk.CENTER, width=17)
         round_spin = tk.Spinbox(self, textvariable=self.num_rounds,
                                 state='readonly',
-                                from_=1, to=100, justify=tk.CENTER, width=13)
+                                from_=1, to=100, justify=tk.CENTER, width=15)
         self.start_button = tk.Button(self, text="Start game",
                                       state=tk.DISABLED,
                                       command=self.start_game,
@@ -111,7 +116,7 @@ class GameOptionsGUI(tk.Frame):
                                      width=15, command=self.controller.destroy)
 
         game_type_label.grid(row=1, column=0, pady=5)
-        game_type_frame.grid(row=1, column=1, pady=5)
+        game_type_combo.grid(row=1, column=1, pady=5)
         name_label.grid(row=2, column=0, pady=5)
         rounds_label.grid(row=3, column=0, pady=5)
 
@@ -147,7 +152,7 @@ class GameOptionsGUI(tk.Frame):
     def change_game(self, rules):
         PlayerObject.set_object_rules(list(rules.keys()), rules)
         self.controller.frames["main_game"] = GameGUI(self.controller)
-        title_string = ", ".join(obj.title() for obj in PlayerObject.allowable_objects) + " Game"
+        title_string = self.controller.game_titles[self.game_type.get()] + " Game"
         self.controller.title(title_string)
         self.controller.title_label.config(text=title_string)
 
@@ -161,30 +166,9 @@ class GameOptionsGUI(tk.Frame):
             return False
         return True
 
-    def game_type_select_callback(self):
+    def game_type_select_callback(self, e):
         rules = RULES[self.game_type.get()]
         self.change_game(rules)
-
-
-class GameSelectionRadio(tk.Frame):
-    def __init__(self, parent):
-        super().__init__(parent)
-
-        game_options = [('Rock, Paper, Scissors', 'RPS'),
-                        ('Rock, Paper, Scissors, Lizard, Spock', 'RPSLS'),
-                        ]
-
-        self.game_radios = [tk.Radiobutton(self, text=option[0],
-                                           value=option[1],
-                                           variable=parent.game_type,
-                                           command=parent.game_type_select_callback,
-                                           )
-                            for option in game_options]
-
-        for ro in self.game_radios:
-            ro.pack(side=tk.TOP, anchor='w')
-
-
 
 
 class GameGUI(tk.Frame):
@@ -192,6 +176,7 @@ class GameGUI(tk.Frame):
         # Initialises the GameGUI as an instance of its superclass - a tkinter frame
         super().__init__()
 
+        # Creates quick references to the controller (overall app) and to the game
         self.controller = controller
         self.game = controller.game
 
@@ -200,6 +185,7 @@ class GameGUI(tk.Frame):
 
         self.outcome = tk.Label(self, textvariable=self.report_message, bg="blue", fg="white", width=35)
 
+        # Creates a dictionary of images for the game buttons
         self.tk_images = {item: ImageTk.PhotoImage(img) for item, img in IMAGES.items()}
 
         # Creates a dictionary with the action buttons for each allowable game object
@@ -208,6 +194,8 @@ class GameGUI(tk.Frame):
                                                      image=self.tk_images[player_obj],
                                                      command=partial(self.select_object, player_obj),
                                                      bg="ivory",
+                                                     compound="right",
+                                                     width=115,
                                                      )
                                for player_obj in PlayerObject.allowable_objects}
 
@@ -231,7 +219,7 @@ class GameGUI(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
 
-        # Binds the return key to have the same effect a pressing the start_button
+        # Binds keys so that the player can choose objects via key presses
         self.bind('<Key>', self.press_key)
 
     def set_up(self):
@@ -252,11 +240,11 @@ class GameGUI(tk.Frame):
                                }
         if key_pressed in action_key_bindings:
             self.action_buttons[action_key_bindings[key_pressed]].invoke()
-        if key_pressed == "o":
+        elif key_pressed == "o":
             self.options_button.invoke()
-        if key_pressed == "n":
+        elif key_pressed == "n":
             self.restart_button.invoke()
-        if key_pressed == "q" or event.keysym == "Escape":
+        elif key_pressed == "q" or event.keysym == "Escape":
             self.quit_button.invoke()
 
     def select_object(self, item):
