@@ -190,6 +190,7 @@ class GameGUI(tk.Frame):
 
         # Creates a dictionary with the action buttons for each allowable game object
         # Use the 'partial' function to give a callback command with an argument
+        # The 'compound' option allows both the text and the image
         self.action_buttons = {player_obj: tk.Button(self, text=player_obj.title(),
                                                      image=self.tk_images[player_obj],
                                                      command=partial(self.select_object, player_obj),
