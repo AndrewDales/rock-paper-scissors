@@ -20,7 +20,7 @@ class TestGUI(tk.Frame):
         # Put focus on the frame to allow key bind to work
         self.focus()
 
-    def press_button(self, e):
+    def press_button(self):
         txt = self.edit_text.get()
         txt += "Hello World!\n"
         self.edit_text.set(txt)
