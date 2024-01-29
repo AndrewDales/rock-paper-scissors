@@ -1,0 +1,6 @@
+class MenuFrame():
+    ...
+
+
+class GameFrame():
+    ...
